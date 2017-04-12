@@ -23,7 +23,7 @@ PagedFileManager::~PagedFileManager()
 
 RC PagedFileManager::createFile(const string &fileName)
 {
-    FILE * file_to_create; // Created_by_Daniel --> variable used to create a new file
+    FILE * file_to_create; //  variable used to create a new file
 
     file_to_create = fopen(fileName.c_str(),"r"); // Method used to ensure the specified file doesn't exist
     if(file_to_create == NULL) // If it returns null, then the specified file doesn't exist'
@@ -49,7 +49,13 @@ RC PagedFileManager::createFile(const string &fileName)
 
 RC PagedFileManager::destroyFile(const string &fileName)
 {
+    if(remove(fileName.c_str())!=0)
+    {
     return -1;
+    }
+    else{
+        return 0;
+    }
 }
 
 
