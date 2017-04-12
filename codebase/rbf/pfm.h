@@ -8,6 +8,7 @@ typedef char byte;
 #define PAGE_SIZE 4096
 #include <string>
 #include <climits>
+#include <stdio.h>   //  Added by Daniel,  include library to handle files
 using namespace std;
 
 class FileHandle;
