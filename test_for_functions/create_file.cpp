@@ -42,14 +42,17 @@ int main(int argc , char** argv)
 {
     //createFile(argv[1]);
 
-    int i = destroyFile(argv[1]);
-    
+    /*
+    int i = destroyFile(argv[1]); 
     if(i!=0)
     {
         printf("cant delete file");
     }
     else
     printf("file deleted");
+    */ 
+     
+
 
     return 0;
 }

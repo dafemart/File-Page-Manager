@@ -1,14 +1,15 @@
+
 include ../makefile.inc
 
 all: librbf.a rbftest
 
-# c file dependencies
-pfm.o: pfm.h
-rbfm.o: rbfm.h
-
 # lib file dependencies
 librbf.a: librbf.a(pfm.o)  # and possibly other .o files
 librbf.a: librbf.a(rbfm.o)
+
+# c file dependencies
+pfm.o: pfm.h
+rbfm.o: rbfm.h
 
 rbftest.o: pfm.h rbfm.h
 
@@ -22,4 +23,4 @@ $(CODEROOT)/rbf/librbf.a:
 
 .PHONY: clean
 clean:
-	-rm rbftest *.a *.o *~
+	-rm rbftest rbftest11a rbftest11b *.a *.o *~
