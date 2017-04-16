@@ -6,6 +6,7 @@ typedef int RC;
 typedef char byte;
 
 #define PAGE_SIZE 4096
+#define PAGE_HEADER_OFFSET sizeof("PAGE_HEADER")
 #include <string>
 #include <climits>
 #include <stdio.h>   //  Added by Daniel,  include library to handle files
@@ -39,6 +40,7 @@ public:
     unsigned readPageCounter;
     unsigned writePageCounter;
     unsigned appendPageCounter;
+    FILE *handleFile;
     
     FileHandle();                                                         // Default constructor
     ~FileHandle();                                                        // Destructor
