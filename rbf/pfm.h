@@ -6,8 +6,12 @@ typedef int RC;
 typedef char byte;
 
 #define PAGE_SIZE 4096
+#define PF_HEADER_LENGTH 6
+#define PF_HEADER "__PF__"
+
 #include <string>
 #include <climits>
+#include <stdio.h>
 using namespace std;
 
 class FileHandle;
@@ -28,11 +32,14 @@ protected:
 
 private:
     static PagedFileManager *_pf_manager;
+    // add a helper
+    bool fileExists  (const string &fileName);
 };
 
 
 class FileHandle
 {
+    FILE* _file;
 public:
     // variables to keep the counter for each operation
     unsigned readPageCounter;
@@ -47,6 +54,11 @@ public:
     RC appendPage(const void *data);                                      // Append a specific page
     unsigned getNumberOfPages();                                          // Get the number of pages in the file
     RC collectCounterValues(unsigned &readPageCount, unsigned &writePageCount, unsigned &appendPageCount);  // Put the current counter values into variables
+    
+    // getter and setter
+    FILE* getFile();
+    void setFile(FILE* file);
+
 }; 
 
 #endif
