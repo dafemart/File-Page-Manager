@@ -1,6 +1,7 @@
 #include "pfm.h"
 #include <unistd.h>
 #include <string.h>
+#include <sys/stat.h>
 
 PagedFileManager* PagedFileManager::_pf_manager = 0;
 
@@ -42,7 +43,6 @@ RC PagedFileManager::createFile(const string &fileName)
     if (fileExists(fileName)) return -1;
     // create the file
     FILE* pagefile = fopen(fileName.c_str(), "w");
-    if (fputs(PF_HEADER, pagefile) < 0) return -1;
     if (fclose(pagefile)) return -1;
     return 0; // on success
 }
@@ -64,13 +64,7 @@ RC PagedFileManager::openFile(const string &fileName, FileHandle &fileHandle)
     // open file
     FILE* pagefile = fopen(fileName.c_str(), "r+");
     if (!pagefile) return -1;
-    // check file header to ensure it's indeed a page file
-    char buf[PF_HEADER_LENGTH + 1];
-    fgets(buf, PF_HEADER_LENGTH + 1, pagefile);
-    if (strcmp(buf, PF_HEADER)) {
-        fclose(pagefile);
-        return -1;
-    }
+    
     // attach the file to the handle
     fileHandle.setFile(pagefile);
     return 0;
@@ -106,7 +100,7 @@ RC FileHandle::readPage(PageNum pageNum, void *data)
     if (pageNum > getNumberOfPages()) return -1;
     // find the start of the page
     if (fseek(_file,
-            PF_HEADER_LENGTH + PAGE_SIZE * pageNum,
+            PAGE_SIZE * pageNum,
             SEEK_SET))
         return -1;
     if (fread(data, 1, PAGE_SIZE, _file) != PAGE_SIZE)
@@ -120,7 +114,7 @@ RC FileHandle::writePage(PageNum pageNum, const void *data)
 {
     if (pageNum > getNumberOfPages()) return -1;
     if (fseek(_file,
-            PF_HEADER_LENGTH + PAGE_SIZE * pageNum,
+            + PAGE_SIZE * pageNum,
             SEEK_SET))
         return -1;
     if (fwrite(data, 1, PAGE_SIZE, _file) != PAGE_SIZE)
@@ -146,7 +140,7 @@ unsigned FileHandle::getNumberOfPages()
     // numOfPages = (fileSize - headerSize) / pageSize
     fseek(_file, 0, SEEK_END);
     auto fileSize = ftell(_file);
-    return ((fileSize - PF_HEADER_LENGTH) / PAGE_SIZE);
+    return (fileSize / PAGE_SIZE);
 }
 
 
