@@ -6,8 +6,9 @@ typedef int RC;
 typedef char byte;
 
 #define PAGE_SIZE 4096
-#define PF_HEADER_LENGTH 6
-#define PF_HEADER "__PF__"
+// we don't need a header!!!
+#define PF_HEADER_LENGTH 0
+#define PF_HEADER ""
 
 #include <string>
 #include <climits>
