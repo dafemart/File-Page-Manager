@@ -105,17 +105,14 @@ RC RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attri
 }
 
 RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor, const void *data) {
-    // cast data to char pointer so that we can perform pointer arithmetic
+    int offset = 0;
     char* _data = (char*)data;
-    // number of fields
     size_t numOfFds = recordDescriptor.size();
-    // number of bytes for null indicator
-    size_t bytes = (size_t) ceil( (float) numOfFds / BYTE_SIZE );
-    // get null indicator bits
-    char nulls[bytes];
-    memcpy(nulls, _data, bytes);
+    int bytes = ceil( (double) numOfFds / BYTE_SIZE );
+    unsigned char * nulls = (unsigned char *) malloc(bytes);
+    memcpy(nulls, _data + offset, bytes);
     // move the pointer to where the first field starts
-    _data += bytes;
+    offset += bytes;
     for (size_t i = 0; i < numOfFds; ++i) {
         cout << recordDescriptor[i].name << ": ";
         // null handling
@@ -125,48 +122,37 @@ RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor
             switch (recordDescriptor[i].type) {
                 case TypeInt:
                 {
-                    char intBuf[INT_SIZE]; 
-                    // void* memcpy( void* dest, const void* src, std::size_t count );
-                    memcpy(intBuf, _data, INT_SIZE);
-                    // how to convert intBuf to integer?
+                    unsigned char * intBuf = (unsigned char *) malloc(INT_SIZE);
+                    memcpy(intBuf, _data + offset, INT_SIZE);
                     cout << *(int*)((void*)intBuf) <<" ";
-                    // move the pointer to next chunk
-                    _data += INT_SIZE;
+                    offset += INT_SIZE;
                     break;
                 }
                 case TypeReal:
                 {
-                    char realBuf[REAL_SIZE];
-                    memcpy(realBuf, _data, REAL_SIZE);
-                    cout << *(int*)((void*)realBuf) <<" ";
-                    _data += REAL_SIZE;
-                    // how to convert intBuf to real?
+                    unsigned char * realBuf = (unsigned char *) malloc(REAL_SIZE);
+                    memcpy(realBuf, _data + offset, REAL_SIZE);
                     cout << *(float*)((void*)realBuf) <<" ";
-                    // move the pointer to next chunk
-                    _data += INT_SIZE;
+                    offset += REAL_SIZE;
                     break;
                 }
                 case TypeVarChar:
                 {
-                    char vclenBuf[VARCHAR_LENGTH_SIZE];
-                    memcpy(vclenBuf, _data, VARCHAR_LENGTH_SIZE);
-                    // how to convert vclenBuf to VARCHAR length?
+                    unsigned char * vclenBuf = (unsigned char *) malloc(VARCHAR_LENGTH_SIZE);
+                    memcpy(vclenBuf, _data + offset, VARCHAR_LENGTH_SIZE);
                     int vclen = *(int*)((void*)vclenBuf);
-                    // move the pointer
-                    _data += VARCHAR_LENGTH_SIZE;
-                    // copy out the chars
-                    char varchar[vclen];
-                    memcpy(varchar, _data, vclen);
+                    offset += VARCHAR_LENGTH_SIZE;
+                    unsigned char * varchar = (unsigned char *) malloc(vclen + 1);
+                    memcpy(varchar, _data + offset, vclen);
+                    varchar[vclen] = '\0'; // terminating the char array
                     cout << varchar <<" ";
-                    // move the pointer to next chunk
-                    _data += vclen;
+                    offset += vclen;
                     break;
                 }
                 default:
                     cout << endl << "Invalid type" << endl;
                     return -1;
             }
-        cout << "endl";
     }
     return 0;
 }
