@@ -4,10 +4,19 @@
 #include <string>
 #include <vector>
 #include <climits>
+#include <iostream>
 
 #include "../rbf/pfm.h"
 
+#define BYTE_SIZE 8
+#define INT_SIZE 4
+#define REAL_SIZE 4
+#define CHAR_SIZE 4
+#define VARCHAR_LENGTH_SIZE 4
+
 using namespace std;
+
+static vector<size_t> PageCurSizes;
 
 // Record ID
 typedef struct
@@ -132,6 +141,7 @@ protected:
 
 private:
   static RecordBasedFileManager *_rbf_manager;
+  PagedFileManager* pfm;
 };
 
 #endif
