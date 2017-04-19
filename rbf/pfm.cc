@@ -2,6 +2,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <vector>
+
+extern vector<size_t> PageCurSizes;
 
 PagedFileManager* PagedFileManager::_pf_manager = 0;
 
@@ -22,7 +25,7 @@ PagedFileManager::PagedFileManager()
 
 PagedFileManager::~PagedFileManager()
 {
-    // dtor
+    delete _pf_manager;
 }
 
 // helper copied from rbftest.cc
@@ -42,7 +45,7 @@ RC PagedFileManager::createFile(const string &fileName)
     // If file already exists, error
     if (fileExists(fileName)) return -1;
     // create the file
-    FILE* pagefile = fopen(fileName.c_str(), "w");
+    FILE* pagefile = fopen(fileName.c_str(), "wb");
     if (fclose(pagefile)) return -1;
     return 0; // on success
 }
@@ -62,7 +65,7 @@ RC PagedFileManager::openFile(const string &fileName, FileHandle &fileHandle)
     // if the handle has file already, error out
     if (fileHandle.getFile()) return -1;
     // open file
-    FILE* pagefile = fopen(fileName.c_str(), "r+");
+    FILE* pagefile = fopen(fileName.c_str(), "rb");
     if (!pagefile) return -1;
     
     // attach the file to the handle
@@ -92,6 +95,7 @@ FileHandle::FileHandle()
 
 FileHandle::~FileHandle()
 {
+    delete _file;
 }
 
 
