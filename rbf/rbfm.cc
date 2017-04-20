@@ -90,6 +90,9 @@ RC RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Att
                 rid.slotNum=N+1;
                 rid.pageNum=itPage;
                 success = true;
+
+                free(newFS);
+                free(newN);
                 break;
             } else {
                 if (inLastPage) {
@@ -113,6 +116,9 @@ RC RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Att
 
         rid.slotNum=0;
         rid.pageNum=curPage+1;
+
+        free(newFS);
+        free(newN);
     }
     return 0;
 }
@@ -137,8 +143,10 @@ RC RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attri
     memcpy(slot,pageData + PAGE_SIZE - 4 - SLOT_SIZE * (slotNum+1), SLOT_SIZE);
     memcpy((char *)data, pageData + slot[0], slot[1]);
     
+    free(pageData);
+    free(slot);
+    free(N);
     return 0;
-    
 }
 
 // working
@@ -164,6 +172,8 @@ RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor
                     memcpy(intBuf, _data + offset, INT_SIZE);
                     cout << *(int*)((void*)intBuf) <<" ";
                     offset += INT_SIZE;
+
+                    free(intBuf);
                     break;
                 }
                 case TypeReal:
@@ -172,6 +182,8 @@ RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor
                     memcpy(realBuf, _data + offset, REAL_SIZE);
                     cout << *(float*)((void*)realBuf) <<" ";
                     offset += REAL_SIZE;
+
+                    free(realBuf);
                     break;
                 }
                 case TypeVarChar:
@@ -185,6 +197,9 @@ RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor
                     varchar[vclen] = '\0'; // terminating the char 
                     cout << varchar <<" ";
                     offset += vclen;
+
+                    free(varchar);
+                    free(vclenBuf);
                     break;
                 }
                 default:
@@ -193,5 +208,6 @@ RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor
             }
     }
     cout << endl;
+    free(nulls);
     return 0;
 }

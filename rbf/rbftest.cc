@@ -507,9 +507,6 @@ int RBFTest_8(RecordBasedFileManager *rbfm)
     // Compare whether the two memory blocks are the same
     if(memcmp(record, returnedData, recordSize) != 0)
     {
-        printf("------");
-        printf("%s",*(char *)record);
-        printf("-----");
         cout << "[FAIL] Test Case 8 Failed!" << endl << endl;
         free(record);
         free(returnedData);
