@@ -3,6 +3,7 @@
 #include "math.h"
 #include "stdint.h"
 
+
 RecordBasedFileManager* RecordBasedFileManager::_rbf_manager = 0;
 
 RecordBasedFileManager* RecordBasedFileManager::instance()
@@ -39,11 +40,22 @@ RC RecordBasedFileManager::closeFile(FileHandle &fileHandle) {
     return _pf_manager->closeFile(fileHandle);;
 }
 
+size_t net_record_length(const vector<Attribute> &recordDescriptor)
+{
+    size_t net_length = 0;
+    for(int i=0; i<recordDescriptor.size();i++)
+    {
+        net_length=net_length +recordDescriptor[i].length;
+    }
+    return net_length;
+}
+
 RC RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid) {
     // cast data to char pointer so that we can perform pointer arithmetic
     char* _data = (char*) data;
-    uint16_t _dataLen = strlen(_data);
     size_t numOfFds = recordDescriptor.size();
+    uint16_t _dataLen = net_record_length(recordDescriptor)+numOfFds/8;
+
     // set the curPage to the last page
     int curPage = fileHandle.getNumberOfPages() - 1;
     char bufFS[2]; // 2-byte int for free space pointer
@@ -75,6 +87,8 @@ RC RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Att
                 memcpy(pdptr + PAGE_SIZE - 4, newN, 2);
                 // finally write page to disk
                 fileHandle.writePage(itPage, pageData);
+                rid.slotNum=N+1;
+                rid.pageNum=itPage;
                 success = true;
                 break;
             } else {
@@ -90,17 +104,21 @@ RC RecordBasedFileManager::insertRecord(FileHandle &fileHandle, const vector<Att
         memcpy(pdptr, _data, _dataLen);
         uint16_t slot[2] = {0, _dataLen};
         uint16_t* sltptr = slot;
-        memcpy(pdptr + PAGE_SIZE - 6, sltptr, 2);
+        memcpy(pdptr + PAGE_SIZE - 8, sltptr, 4);
         uint16_t* newFS = new uint16_t(_dataLen);
         memcpy(pdptr + PAGE_SIZE - 2, newFS, 2);
         uint16_t* newN = new uint16_t(1);
         memcpy(pdptr + PAGE_SIZE - 4, newN, 2);
         fileHandle.appendPage(pageData);
+
+        rid.slotNum=0;
+        rid.pageNum=curPage+1;
     }
     return 0;
 }
 
 RC RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid, void *data) {
+    
     unsigned pageNum = rid.pageNum;
     uint16_t slotNum = rid.slotNum;
     unsigned char * pageData = (unsigned char *) malloc(PAGE_SIZE);
@@ -116,9 +134,11 @@ RC RecordBasedFileManager::readRecord(FileHandle &fileHandle, const vector<Attri
         return -1;
     }
     uint16_t * slot = (uint16_t *) malloc(4);
-    memcpy(slot, pageData + PAGE_SIZE - 4 - SLOT_SIZE * slotNum, SLOT_SIZE);
+    memcpy(slot,pageData + PAGE_SIZE - 4 - SLOT_SIZE * (slotNum+1), SLOT_SIZE);
     memcpy((char *)data, pageData + slot[0], slot[1]);
+    
     return 0;
+    
 }
 
 // working
@@ -158,11 +178,11 @@ RC RecordBasedFileManager::printRecord(const vector<Attribute> &recordDescriptor
                 {
                     unsigned char * vclenBuf = (unsigned char *) malloc(VARCHAR_LENGTH_SIZE);
                     memcpy(vclenBuf, _data + offset, VARCHAR_LENGTH_SIZE);
-                    int vclen = *(int*)((void*)vclenBuf);
+                    int vclen = *((int*)((void*)vclenBuf));
                     offset += VARCHAR_LENGTH_SIZE;
                     unsigned char * varchar = (unsigned char *) malloc(vclen + 1);
                     memcpy(varchar, _data + offset, vclen);
-                    varchar[vclen] = '\0'; // terminating the char array
+                    varchar[vclen] = '\0'; // terminating the char 
                     cout << varchar <<" ";
                     offset += vclen;
                     break;
