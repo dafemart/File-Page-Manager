@@ -103,7 +103,11 @@ public:
   //  !!! The same format is used for updateRecord(), the returned data of readRecord(), and readAttribute().
   // For example, refer to the Q8 of Project 1 wiki page.
   RC insertRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid);
+  RC insertToPage(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid);
+  RC insertToNewPage(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const void *data, RID &rid);
 
+  int getRecordLength(const vector<Attribute> &recordDescriptor);
+  
   RC readRecord(FileHandle &fileHandle, const vector<Attribute> &recordDescriptor, const RID &rid, void *data);
   
   // This method will be mainly used for debugging/testing. 
@@ -134,7 +138,7 @@ IMPORTANT, PLEASE READ: All methods below this comment (other than the construct
 
 public:
 
-protected:
+// protected:
   RecordBasedFileManager();
   ~RecordBasedFileManager();
 

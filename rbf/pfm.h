@@ -24,7 +24,7 @@ public:
     RC openFile      (const string &fileName, FileHandle &fileHandle);    // Open a file
     RC closeFile     (FileHandle &fileHandle);                            // Close a file
 
-protected:
+// protected: // should not be protected
     PagedFileManager();                                                   // Constructor
     ~PagedFileManager();                                                  // Destructor
 
@@ -56,7 +56,6 @@ public:
     // getter and setter
     FILE* getFile();
     void setFile(FILE* file);
-
 }; 
 
 #endif

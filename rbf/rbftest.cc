@@ -477,6 +477,7 @@ int RBFTest_8(RecordBasedFileManager *rbfm)
     RID rid; 
     int recordSize = 0;
     void *record = malloc(100);
+    memset(record, 0, 100); // added by student
     void *returnedData = malloc(100);
 
     vector<Attribute> recordDescriptor;
@@ -494,12 +495,10 @@ int RBFTest_8(RecordBasedFileManager *rbfm)
     
     rc = rbfm->insertRecord(fileHandle, recordDescriptor, record, rid);
     assert(rc == success && "Inserting a record should not fail.");
-
     
     // Given the rid, read the record from file
     rc = rbfm->readRecord(fileHandle, recordDescriptor, rid, returnedData);
     assert(rc == success && "Reading a record should not fail.");
-
 
     cout << endl << "Returned Data:" << endl;
     rbfm->printRecord(recordDescriptor, returnedData);
@@ -513,7 +512,7 @@ int RBFTest_8(RecordBasedFileManager *rbfm)
         return -1;
     }
     
-    cout << endl;
+    cout <<"Success "<< endl;
 
     // Close the file "test8"
     rc = rbfm->closeFile(fileHandle);
@@ -528,6 +527,7 @@ int RBFTest_8(RecordBasedFileManager *rbfm)
     
     free(record);
     free(returnedData);
+    free(nullsIndicator); // added by student
 
     cout << "RBF Test Case 8 Finished! The result will be examined." << endl << endl;
     
@@ -594,7 +594,7 @@ int RBFTest_9(RecordBasedFileManager *rbfm, vector<RID> &rids, vector<int> &size
     assert(rc == success && "Closing the file should not fail.");
 
     free(record);
-    
+    free(nullsIndicator); // added by student
     
     // Write RIDs to the disk. Do not use this code in your codebase. This is not a PAGE-BASED operation - for the test purpose only.
     ofstream ridsFile("test9rids", ios::out | ios::trunc | ios::binary);
@@ -750,6 +750,8 @@ int RBFTest_10(RecordBasedFileManager *rbfm) {
     remove("test9sizes");
     remove("test9rids");
     
+    free(nullsIndicator); // added by student
+
     return 0;
 }
 
@@ -788,5 +790,8 @@ int main()
     RBFTest_9(rbfm, rids, sizes);
     RBFTest_10(rbfm);
     
+    // free memory
+    delete pfm;
+    delete rbfm;
     return 0;
 }

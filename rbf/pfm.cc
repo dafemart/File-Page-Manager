@@ -19,13 +19,12 @@ PagedFileManager* PagedFileManager::instance()
 
 PagedFileManager::PagedFileManager()
 {
-    // ctor
 }
 
 
 PagedFileManager::~PagedFileManager()
 {
-    delete _pf_manager;
+    if(!_pf_manager) delete _pf_manager;
 }
 
 // helper copied from rbftest.cc
@@ -95,7 +94,6 @@ FileHandle::FileHandle()
 
 FileHandle::~FileHandle()
 {
-    delete _file;
 }
 
 
